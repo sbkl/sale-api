@@ -1,0 +1,288 @@
+// generator client {
+//   provider        = "prisma-client-js"
+//   previewFeatures = ["referentialIntegrity"]
+// }
+
+// datasource db {
+//   provider             = "mysql"
+//   url                  = env("DATABASE_URL")
+//   shadowDatabaseUrl    = env("SHADOW_DATABASE_URL")
+//   referentialIntegrity = "prisma"
+// }
+
+// generator typegraphql {
+//   provider = "typegraphql-prisma"
+// }
+datasource db {
+  url      = env("DATABASE_URL")
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator typegraphql {
+  provider = "typegraphql-prisma"
+}
+
+model Region {
+  id        String   @id
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  markets Market[]
+  stores  Store[]
+  offices Office[]
+}
+
+model Market {
+  id        String   @id
+  region    Region   @relation(fields: [regionId], references: [id])
+  regionId  String
+  name      String   @unique
+  currency  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stores Store[]
+}
+
+model Store {
+  id            String    @id
+  region        Region    @relation(fields: [regionId], references: [id])
+  regionId      String
+  market        Market    @relation(fields: [marketId], references: [id])
+  marketId      String
+  name          String    @unique
+  deactivatedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Office {
+  id            String    @id
+  region        Region    @relation(fields: [regionId], references: [id])
+  regionId      String
+  name          String
+  deactivatedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  officeables Officeable[]
+}
+
+model Officeable {
+  id             String @id @default(uuid())
+  office         Office @relation(fields: [officeId], references: [id])
+  officeId       String
+  officeableType String
+  officeableId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([officeId, officeableType, officeableId])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  plantType String?
+  plantId   String?
+  firstName String?
+  lastName  String?
+  email     String   @unique @db.VarChar(255)
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions        Transaction[] @relation("user")
+  transactionsCreated Transaction[] @relation("createdBy")
+  cart                Cart?
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  eventName String
+  from      DateTime
+  to        DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  collections CollectionsOnEvents[]
+}
+
+model Collection {
+  id             String   @id @default(uuid())
+  collectionName String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  events CollectionsOnEvents[]
+  looks  Look[]
+}
+
+model CollectionsOnEvents {
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+  event        Event      @relation(fields: [eventId], references: [id])
+  eventId      String
+
+  @@id([collectionId, eventId])
+}
+
+model Look {
+  id           String     @id @default(uuid())
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+  lookName     String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  materials LooksOnMaterials[]
+}
+
+model Material {
+  id          String   @id
+  description String   @db.VarChar(255)
+  colour      String   @db.VarChar(255)
+  fit         String   @db.VarChar(255)
+  look        String   @db.VarChar(255)
+  level2      String   @db.VarChar(255)
+  level25     String   @db.VarChar(255)
+  level3      String   @db.VarChar(255)
+  level4      String   @db.VarChar(255)
+  level5      String   @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  looks    LooksOnMaterials[]
+  prices   Price[]
+  articles Article[]
+}
+
+model LooksOnMaterials {
+  look       Look     @relation(fields: [lookId], references: [id])
+  lookId     String
+  material   Material @relation(fields: [materialId], references: [id])
+  materialId String
+
+  @@id([lookId, materialId])
+}
+
+model Price {
+  id         String   @id @default(uuid())
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  materialId String
+  value      Int
+  currency   String   @db.VarChar(3)
+  validFrom  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Article {
+  id         String   @id
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  materialId String
+  size       String
+  stock      Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  barcodes         Barcode[]
+  transactionItems TransactionItem[]
+  cartItems        CartItem[]
+}
+
+model Barcode {
+  id        String   @id
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId String
+  ean       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Media {
+  id         String   @id @default(uuid())
+  mediaType  String
+  providerId String?
+  number     Int
+  status     String
+  mimetype   String
+  size       Int
+  duration   Int?
+  name       String
+  width      Int
+  height     Int
+  path       String?  @unique @db.VarChar(255)
+  thumbnail  String?  @unique @db.VarChar(255)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  mediables Mediable[]
+}
+
+model Mediable {
+  id           String   @id @default(uuid())
+  media        Media    @relation(fields: [mediaId], references: [id])
+  mediaId      String
+  mediableType String
+  mediableId   String
+  sort         Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items CartItem[]
+}
+
+model CartItem {
+  id        String  @id @default(uuid())
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId String
+  quantity  Int
+
+  @@unique([cartId, articleId])
+}
+
+model Transaction {
+  id          String   @id
+  user        User     @relation(name: "user", fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  units       Int      @db.Integer
+  amount      Int      @db.Integer
+  currency    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation(name: "createdBy", fields: [createdById], references: [id], onDelete: Cascade)
+  createdById String
+
+  items TransactionItem[]
+}
+
+model TransactionItem {
+  id            String      @id @default(uuid())
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transactionId String
+  article       Article     @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId     String
+  units         Int         @db.Integer
+  price         Int         @db.Integer
+  amount        Int         @db.Integer
+  currency      String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}

@@ -1,0 +1,8 @@
+{
+  "cron": [
+    {
+      "command": "npm run vimeo-encoding-check",
+      "schedule": "* * * * *"
+    }
+  ]
+}
