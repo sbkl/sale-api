@@ -143,6 +143,8 @@ export class UserService {
         where: { email },
       });
 
+      console.log("arrived here", user);
+
       if (!user) {
         user = await prisma.user.create({
           data: {
