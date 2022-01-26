@@ -129,10 +129,10 @@ export class UserService {
 
       const user = await prisma.user.upsert({
         where: {
-          email,
+          email: email.toLowerCase(),
         },
         create: {
-          email,
+          email: email.toLowerCase(),
           password,
           role: Role.Unknown,
         },
