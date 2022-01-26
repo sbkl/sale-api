@@ -12,4 +12,4 @@ git push
 
 docker buildx build --platform linux/amd64 -t sbkl/sale:$VERSION --push .
 
-ssh root@157.245.201.187 "docker pull sbkl/sale:$VERSION && docker tag sbkl/sale:$VERSION dokku/api:latest && dokku git:from-image api dokku/api:latest && dokku ps:rebuild api"
+ssh root@157.245.204.117 "docker pull sbkl/sale:$VERSION && docker tag sbkl/sale:$VERSION dokku/api:latest && dokku git:from-image api dokku/api:latest && dokku ps:rebuild api"
