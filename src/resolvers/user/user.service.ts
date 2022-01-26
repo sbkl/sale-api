@@ -132,24 +132,26 @@ export class UserService {
 
       const password = await argon2.hash(initialPassword);
 
-      console.log("initialPassword", initialPassword);
-
-      console.log("password", password);
-      console.log("Role.Unknown", Role.Unknown);
-
-      const user = await prisma.user.upsert({
-        where: {
-          email,
-        },
-        create: {
-          email,
-          password,
-          role: Role.Unknown,
-        },
-        update: {
-          password,
-        },
+      console.log("user", {
+        email,
+        initialPassword,
+        password,
+        role: Role.Unknown,
       });
+
+      let user = await prisma.user.findFirst({
+        where: { email },
+      });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email,
+            password,
+            role: Role.Unknown,
+          },
+        });
+      }
 
       const { redis } = this.context;
 
