@@ -7,7 +7,6 @@ import {
   TransactionTotal,
 } from "./transaction.object";
 import { Transaction } from "@generated/type-graphql";
-import { CreateTransactionInput } from "./transaction.input";
 
 @Service()
 export class TransactionService {

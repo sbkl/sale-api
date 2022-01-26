@@ -20,7 +20,6 @@ import {
   UpdateCartItemInput,
 } from "./cart.input";
 import { MyContext } from "src/types";
-import { Session } from "../user/user.object";
 
 @Service()
 @Resolver(() => Cart)

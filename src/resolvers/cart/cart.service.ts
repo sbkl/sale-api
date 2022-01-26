@@ -1,7 +1,6 @@
-import { Prisma, TransactionItem } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { MyContext } from "src/types";
 import { Inject, Service } from "typedi";
-import { Session } from "../user/user.object";
 import {
   AddToCartInput,
   RemoveFromCartInput,
