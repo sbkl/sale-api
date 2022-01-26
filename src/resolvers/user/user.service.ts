@@ -20,13 +20,13 @@ export class UserService {
 
   async session(): Promise<Session> {
     const { prisma, req } = this.context;
-    if (!req.session.userId) {
-      return {
-        id: "Current",
-        user: null,
-        error: "Not authenticated",
-      };
-    }
+    // if (!req.session.userId) {
+    //   return {
+    //     id: "Current",
+    //     user: null,
+    //     error: "Not authenticated",
+    //   };
+    // }
     const user = await prisma.user.findFirst({
       where: { id: req.session.userId },
     });
