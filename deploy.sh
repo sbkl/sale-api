@@ -10,6 +10,6 @@ git commit -m "Deploy $VERSION"
 
 git push
 
-docker buildx build --platform linux/amd64 -t sbkl/merch:$VERSION --push .
+docker buildx build --platform linux/amd64 -t sbkl/sale:$VERSION --push .
 
-ssh root@128.199.231.30 "docker pull sbkl/merch:$VERSION && docker tag sbkl/merch:$VERSION dokku/api:latest && dokku git:from-image api dokku/api:latest"
+ssh root@157.245.201.187 "docker pull sbkl/sale:$VERSION && docker tag sbkl/sale:$VERSION dokku/api:latest && dokku git:from-image api dokku/api:latest && dokku ps:rebuild api"
