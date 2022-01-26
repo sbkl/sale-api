@@ -31,8 +31,6 @@ export class UserService {
       where: { id: req.session.userId },
     });
 
-    console.log("session user", user);
-
     if (!user) {
       await this.logout();
       return {
