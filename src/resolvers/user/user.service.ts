@@ -31,6 +31,8 @@ export class UserService {
       where: { id: req.session.userId },
     });
 
+    console.log("session user", user);
+
     if (!user) {
       await this.logout();
       return {
@@ -40,10 +42,13 @@ export class UserService {
       };
     }
 
+    console.log("here1");
+
     const cart = await prisma.cart.findFirst({
       where: { userId: user.id },
     });
 
+    console.log("here2");
     const quotaPurchased =
       (
         await prisma.transaction.aggregate({
@@ -55,7 +60,7 @@ export class UserService {
           },
         })
       )._sum.units || 0;
-
+    console.log("here3");
     const transactionItems = await prisma.transactionItem.findMany({
       where: {
         transaction: {
@@ -63,7 +68,7 @@ export class UserService {
         },
       },
     });
-
+    console.log("here4");
     return {
       id: "Current",
       user,
@@ -122,43 +127,47 @@ export class UserService {
         token: "",
       };
     }
-
-    const initialPassword = Math.random().toString().substring(2, 8);
-
-    const password = await argon2.hash(initialPassword);
-
-    const user = await prisma.user.upsert({
-      where: {
-        email,
-      },
-      create: {
-        email,
-        password,
-        role: Role.Unknown,
-      },
-      update: {
-        password,
-      },
-    });
-
-    const { redis } = this.context;
-
-    if (!user)
-      return {
-        token: "",
-        error: "Not authenticated",
-      };
-
-    const token = v4();
-
-    await redis.set(
-      PASSWORD_REQUEST_PREFIX + token,
-      user.id,
-      "ex",
-      1000 * 60 * 60 * 24 * 3
-    ); // 3 days
-
     try {
+      const initialPassword = Math.random().toString().substring(2, 8);
+
+      const password = await argon2.hash(initialPassword);
+
+      console.log("initialPassword", initialPassword);
+
+      console.log("password", password);
+      console.log("Role.Unknown", Role.Unknown);
+
+      const user = await prisma.user.upsert({
+        where: {
+          email,
+        },
+        create: {
+          email,
+          password,
+          role: Role.Unknown,
+        },
+        update: {
+          password,
+        },
+      });
+
+      const { redis } = this.context;
+
+      if (!user)
+        return {
+          token: "",
+          error: "Not authenticated",
+        };
+
+      const token = v4();
+
+      await redis.set(
+        PASSWORD_REQUEST_PREFIX + token,
+        user.id,
+        "ex",
+        1000 * 60 * 60 * 24 * 3
+      ); // 3 days
+
       await new PasswordRequestEmail({
         to: user.email,
         code: initialPassword,
@@ -168,7 +177,7 @@ export class UserService {
       console.log(e);
       return {
         token: "",
-        error: "Email couldnt be sent. Is the connection open?",
+        error: JSON.stringify(e, null, -2),
       };
     }
   }
