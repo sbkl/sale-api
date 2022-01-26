@@ -40,13 +40,10 @@ export class UserService {
       };
     }
 
-    console.log("here1");
-
     const cart = await prisma.cart.findFirst({
       where: { userId: user.id },
     });
 
-    console.log("here2");
     const quotaPurchased =
       (
         await prisma.transaction.aggregate({
@@ -58,7 +55,7 @@ export class UserService {
           },
         })
       )._sum.units || 0;
-    console.log("here3");
+
     const transactionItems = await prisma.transactionItem.findMany({
       where: {
         transaction: {
@@ -66,7 +63,7 @@ export class UserService {
         },
       },
     });
-    console.log("here4");
+
     return {
       id: "Current",
       user,
@@ -130,28 +127,19 @@ export class UserService {
 
       const password = await argon2.hash(initialPassword);
 
-      console.log("user", {
-        email,
-        initialPassword,
-        password,
-        role: Role.Unknown,
+      const user = await prisma.user.upsert({
+        where: {
+          email,
+        },
+        create: {
+          email,
+          password,
+          role: Role.Unknown,
+        },
+        update: {
+          password,
+        },
       });
-
-      let user = await prisma.user.findFirst({
-        where: { email },
-      });
-
-      console.log("arrived here", user);
-
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email,
-            password,
-            role: Role.Unknown,
-          },
-        });
-      }
 
       const { redis } = this.context;
 
