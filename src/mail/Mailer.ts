@@ -39,7 +39,6 @@ export class Mailer {
 
   async send() {
     const template = path.join(__dirname, "templates", "welcome");
-
     const email = new EmailTemplate({
       transport: this.transporter,
       send: true,
