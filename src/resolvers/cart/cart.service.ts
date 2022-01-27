@@ -61,6 +61,9 @@ export class CartService {
     const quotaPurchased =
       (
         await prisma.transaction.aggregate({
+          where: {
+            userId: req.session.userId,
+          },
           _sum: {
             units: true,
           },
@@ -151,6 +154,9 @@ export class CartService {
     const quotaPurchased =
       (
         await prisma.transaction.aggregate({
+          where: {
+            userId: req.session.userId,
+          },
           _sum: {
             units: true,
           },
