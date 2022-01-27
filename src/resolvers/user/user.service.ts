@@ -11,7 +11,7 @@ import { MyContext } from "../../types";
 import { LoginResponse, RequestPasswordResponse, Session } from "./user.object";
 import { User } from "@generated/type-graphql";
 import { PasswordRequestEmail } from "../../mail/PasswordRequestEmail";
-import { LoginInput, Role } from "./user.input";
+import { LoginInput } from "./user.input";
 
 @Service()
 export class UserService {

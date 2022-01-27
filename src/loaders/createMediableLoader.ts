@@ -18,6 +18,7 @@ export const createMediableLoader = (prisma: PrismaClient) =>
     if (!mediableType) return [];
     const mediables = await prisma.mediable.findMany({
       where: { mediableId: { in: ids }, mediableType },
+      orderBy: { sort: "asc" },
     });
 
     const modelIdsToMediables = mediables.reduce<Record<string, Mediable[]>>(

@@ -58,6 +58,22 @@ export class CartService {
       };
     }
 
+    const quotaPurchased =
+      (
+        await prisma.transaction.aggregate({
+          _sum: {
+            units: true,
+          },
+        })
+      )._sum.units || 0;
+
+    if (quotaPurchased >= 2) {
+      return {
+        cart,
+        look,
+        error: "You have reached your quota of 2 units",
+      };
+    }
     await prisma.cartItem.upsert({
       where: {
         cartId_articleId: {
@@ -131,6 +147,24 @@ export class CartService {
         error: "Not enough stock available",
       };
     }
+
+    const quotaPurchased =
+      (
+        await prisma.transaction.aggregate({
+          _sum: {
+            units: true,
+          },
+        })
+      )._sum.units || 0;
+
+    if (quotaPurchased >= 2 && quantity > cartItem.quantity) {
+      return {
+        cart,
+        look,
+        error: "You have reached your quota of 2 units",
+      };
+    }
+
     await prisma.cartItem.update({
       where: {
         id: cartItem.id,
@@ -320,8 +354,18 @@ export class CartService {
               (p) => p.currency === userCurrency
             )?.value;
             if (price) {
-              carry[0] = carry[0] + item.quantity;
-              carry[1] = carry[1] + item.quantity * price * 0.2;
+              carry[0] =
+                carry[0] +
+                (article.stock >= item.quantity
+                  ? item.quantity
+                  : article.stock);
+              carry[1] =
+                carry[1] +
+                (article.stock >= item.quantity
+                  ? item.quantity
+                  : article.stock) *
+                  price *
+                  0.2;
             }
           }
         }
@@ -386,18 +430,6 @@ export class CartService {
       },
     });
 
-    const quotaPurchased =
-      (
-        await prisma.transaction.aggregate({
-          where: {
-            userId: user.id,
-          },
-          _sum: {
-            units: true,
-          },
-        })
-      )._sum.units || 0;
-
     const transactionItems = await prisma.transactionItem.findMany({
       where: {
         transaction: {
@@ -431,7 +463,7 @@ export class CartService {
         id: "Current",
         user,
         cart,
-        quotaPurchased,
+        quotaPurchased: units,
         transactionItems,
         error: null,
       },
