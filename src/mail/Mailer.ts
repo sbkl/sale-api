@@ -65,7 +65,5 @@ export class Mailer {
         imageSrc: this.imageSrc,
       },
     });
-
-    this.transporter.close();
   }
 }
