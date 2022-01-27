@@ -14,13 +14,16 @@ export type MailAction = {
   href: string;
 };
 
-export class Mailer {
-  private host = process.env.MAIL_HOST;
-  private port = parseInt(process.env.MAIL_PORT);
-  private auth = {
+const instance = nodemailer.createTransport({
+  host: process.env.MAIL_HOST,
+  port: parseInt(process.env.MAIL_PORT),
+  auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASSWORD,
-  };
+  },
+});
+
+export class Mailer {
   private from = `${process.env.MAIL_FROM} <${process.env.MAIL_USER}>`;
   private transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo>;
   private options: MailInput;
@@ -30,11 +33,7 @@ export class Mailer {
   public imageSrc: string;
 
   constructor(options: MailInput) {
-    this.transporter = nodemailer.createTransport({
-      host: this.host,
-      port: this.port,
-      auth: this.auth,
-    });
+    this.transporter = instance;
     this.options = options;
   }
 
@@ -66,5 +65,7 @@ export class Mailer {
         imageSrc: this.imageSrc,
       },
     });
+
+    this.transporter.close();
   }
 }
