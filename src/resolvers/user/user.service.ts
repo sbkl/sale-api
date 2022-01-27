@@ -127,16 +127,23 @@ export class UserService {
 
       const password = await argon2.hash(initialPassword);
 
-      const user = await prisma.user.upsert({
+      let user = await prisma.user.findFirst({
         where: {
           email: email.toLowerCase(),
         },
-        create: {
+      });
+
+      if (!user)
+        return {
+          token: "",
+          error: "Not account found.",
+        };
+
+      await prisma.user.update({
+        where: {
           email: email.toLowerCase(),
-          password,
-          role: Role.Unknown,
         },
-        update: {
+        data: {
           password,
         },
       });
