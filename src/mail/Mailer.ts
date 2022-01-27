@@ -24,7 +24,7 @@ const instance = nodemailer.createTransport({
 });
 
 export class Mailer {
-  private from = `${process.env.MAIL_FROM} <${process.env.MAIL_USER}>`;
+  private from = `${process.env.MAIL_FROM} <${process.env.MAIL_USER_EMAIL}>`;
   private transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo>;
   private options: MailInput;
   public subject: string;
